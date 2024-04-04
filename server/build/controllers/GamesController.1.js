@@ -12,31 +12,23 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.gamesController = void 0;
+exports.GamesController = void 0;
 const database_1 = __importDefault(require("../database"));
 class GamesController {
     list(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
-            const games = yield new Promise((resolve, reject) => {
-                database_1.default.query('SELECT * FROM Games', (err, rows, fields) => {
-                    if (err)
-                        reject(err); // En caso de error, resolvemos la Promise con error
-                    resolve(rows); // Si no, resolvemos con el resultado
-                });
-            });
+            const games = yield database_1.default.query('SELECT * FROM Games');
             res.json(games);
         });
     }
     getOne(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
-            const game = yield new Promise((resolve, reject) => {
-                database_1.default.query('SELECT * FROM Games WHERE id = ?', [req.params.id], (err, rows, fields) => {
-                    if (err)
-                        reject(err);
-                    resolve(rows);
-                });
-            });
-            res.json(game);
+            const { id } = req.params;
+            const games = yield database_1.default.query('SELECT * FROM Games WHERE id = ?', [id]);
+            if (games.lenght > 0) {
+                return res.json(games[0]);
+            }
+            res.status(404).json({ text: "The game doesn't exist" });
         });
     }
     create(req, res) {
@@ -46,17 +38,10 @@ class GamesController {
         });
     }
     delete(req, res) {
-        return __awaiter(this, void 0, void 0, function* () {
-            yield database_1.default.query('DELETE FROM Games WHERE id = ?', [req.params.id]);
-            res.json({ text: 'Deleting game ' + req.params.id });
-        });
+        res.json({ text: 'deleting a game' + req.params.id });
     }
     update(req, res) {
-        return __awaiter(this, void 0, void 0, function* () {
-            yield database_1.default.query('UPDATE Games SET ? WHERE id = ?', [req.body, req.params.id]);
-            res.json({ text: 'Updating game ' + req.params.id });
-        });
+        res.json({ text: 'updating a game' + req.params.id });
     }
 }
-exports.gamesController = new GamesController();
-exports.default = exports.gamesController;
+exports.GamesController = GamesController;
